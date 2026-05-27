@@ -1,0 +1,6 @@
+{
+  "name": "Nimmala Tanuj Portfolio",
+  "description": "An interactive portfolio and personal project showcase website featuring an AI Twin assistant, dynamic project simulators, and a modern custom theme dashboard for Nimmala Tanuj.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
