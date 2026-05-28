@@ -10,7 +10,7 @@ interface NavigationProps {
 }
 
 export default function Navigation({ activeSection, onNavigate, onResumeClick }: NavigationProps) {
-  const sections = ["about", "skills", "projects", "ai-assistant", "contact"];
+  const sections = ["about", "skills", "projects", "contact"];
   const { accent, setAccent, theme } = useTheme();
 
   const themes: { id: AccentColor; label: string; colorClass: string; bgClass: string; dotColor: string }[] = [
@@ -105,7 +105,7 @@ export default function Navigation({ activeSection, onNavigate, onResumeClick }:
                   />
                 )}
                 <span className="relative z-10">
-                  {sec === "ai-assistant" ? "AI Twin 🤖" : sec.replace("-", " ")}
+                  {sec.replace("-", " ")}
                 </span>
               </button>
             ))}

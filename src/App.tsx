@@ -7,7 +7,6 @@ import Hero from "./components/Hero";
 import ProjectShowcase from "./components/ProjectShowcase";
 import SkillsGrid from "./components/SkillsGrid";
 import ResumeTimeline from "./components/ResumeTimeline";
-import AiTwinChat from "./components/AiTwinChat";
 import ContactForm from "./components/ContactForm";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 
@@ -110,7 +109,7 @@ startxref
   // Monitor scrolling to dynamically update active header tab
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ["about", "skills", "projects", "ai-assistant", "contact"];
+      const sections = ["about", "skills", "projects", "contact"];
       const scrollPos = window.scrollY + 200;
 
       for (const section of sections) {
@@ -195,9 +194,6 @@ startxref
 
         {/* Sandboxed Projects visual simulation */}
         <ProjectShowcase />
-
-        {/* Complete AI Assistant dialogue console */}
-        <AiTwinChat />
 
         {/* Contact info and mail forms */}
         <ContactForm />
