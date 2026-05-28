@@ -86,7 +86,7 @@ export default function AiTwinChat() {
   const { accent, theme } = useTheme();
   
   const activeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Set up initial message and voices
   useEffect(() => {
@@ -165,9 +165,14 @@ export default function AiTwinChat() {
     window.speechSynthesis.speak(utterance);
   };
 
-  // Auto-scroll to lowest message visible
+  // Auto-scroll to lowest message visible within the dialogue container
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth"
+      });
+    }
   };
 
   useEffect(() => {
@@ -354,7 +359,7 @@ export default function AiTwinChat() {
           </div>
 
           {/* Dialogue Space */}
-          <div className="flex-grow p-6 overflow-y-auto space-y-4 bg-zinc-900/40 relative z-10">
+          <div ref={chatContainerRef} className="flex-grow p-6 overflow-y-auto space-y-4 bg-zinc-900/40 relative z-10">
             <AnimatePresence initial={false}>
               
               {messages.map((msg) => (
@@ -448,7 +453,6 @@ export default function AiTwinChat() {
               )}
 
             </AnimatePresence>
-            <div ref={messagesEndRef} />
           </div>
 
           {/* Quick chip selector toolbar */}

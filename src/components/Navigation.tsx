@@ -35,9 +35,36 @@ export default function Navigation({ activeSection, onNavigate, onResumeClick }:
             </span>
           </div>
           <div>
-            <h1 className={`font-sans font-bold tracking-tight text-white text-base group-hover:${theme.primaryText} transition-colors`}>
-              Nimmala Tanuj
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className={`font-sans font-bold tracking-tight text-white text-base group-hover:${theme.primaryText} transition-colors`}>
+                Nimmala Tanuj
+              </h1>
+              <div 
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 bg-zinc-900 border border-zinc-800/80 p-0.5 rounded-full px-1.5" 
+                title="Switch accent theme color"
+              >
+                {themes.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAccent(t.id);
+                    }}
+                    title={`Switch to ${t.label}`}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 relative cursor-pointer flex items-center justify-center ${t.bgClass} ${
+                      accent === t.id 
+                        ? "scale-110 ring-1 ring-white/80 ring-offset-0.5 ring-offset-zinc-950" 
+                        : "opacity-45 hover:opacity-90 hover:scale-105"
+                    }`}
+                  >
+                    {accent === t.id && (
+                      <span className="absolute w-0.5 h-0.5 bg-white rounded-full" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
             <p className="font-mono text-[9px] text-zinc-500 uppercase tracking-widest flex items-center gap-1">
               <Terminal className="w-2.5 h-2.5" /> B.Tech CSE Portfolio
             </p>
@@ -58,27 +85,6 @@ export default function Navigation({ activeSection, onNavigate, onResumeClick }:
 
         {/* Global Nav Targets & Theme Selector */}
         <div className="flex items-center gap-2 md:gap-4 flex-wrap justify-center">
-          
-          {/* Accent Color Palettes Switches */}
-          <div className="flex items-center gap-1.5 bg-zinc-900/40 border border-zinc-850 p-1 rounded-full px-2.5" title="Switch accent theme color">
-            <span className="hidden xl:inline font-mono text-[8.5px] uppercase tracking-wider text-zinc-500 mr-1.5">Accent:</span>
-            {themes.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setAccent(t.id)}
-                title={`Switch to ${t.label}`}
-                className={`w-3.5 h-3.5 rounded-full transition-all duration-350 relative cursor-pointer flex items-center justify-center ${t.bgClass} ${
-                  accent === t.id 
-                    ? "scale-125 ring-2 ring-white/70 ring-offset-1 ring-offset-zinc-950" 
-                    : "opacity-45 hover:opacity-90 hover:scale-110"
-                }`}
-              >
-                {accent === t.id && (
-                  <span className="absolute w-1 h-1 bg-white rounded-full" />
-                )}
-              </button>
-            ))}
-          </div>
 
           <nav className="flex items-center bg-zinc-900/60 border border-zinc-800/40 p-1 rounded-full">
             {sections.map((sec) => (
