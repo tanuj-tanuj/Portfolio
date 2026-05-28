@@ -139,16 +139,10 @@ export default function Hero({ onNavigate, onResumeClick }: HeroProps) {
           </div>
 
           {/* Interactive CTA buttons */}
-          <div className="flex items-center gap-4 mt-4 w-full sm:w-auto">
-            <button
-              onClick={() => onNavigate("ai-assistant")}
-              className={`px-6 py-3 bg-gradient-to-r ${theme.buttonGradient} text-white font-sans font-semibold text-xs md:text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-black/30 active:scale-[0.98] transition-all cursor-pointer flex-1 sm:flex-none text-center border ${theme.primaryBorder}`}
-            >
-              Consult AI twin
-            </button>
+          <div className="flex items-center gap-4 mt-6 w-full sm:w-auto">
             <button
               onClick={() => onNavigate("projects")}
-              className={`px-6 py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:${theme.primaryText} font-mono text-xs md:text-sm uppercase tracking-wider rounded-xl border border-zinc-800 hover:border-zinc-700 active:scale-[0.98] transition-all cursor-pointer flex-1 sm:flex-none text-center`}
+              className={`px-8 py-3.5 bg-gradient-to-r ${theme.buttonGradient} text-white font-sans font-bold text-xs md:text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-black/40 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer flex-1 sm:flex-none text-center border ${theme.primaryBorder}`}
             >
               Browse Works
             </button>

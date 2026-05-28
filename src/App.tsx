@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Github, Linkedin, Mail, Phone, Calendar, MapPin, X, Printer, Circle, Heart, Download } from "lucide-react";
+import { Github, Linkedin, Mail, Phone, Calendar, MapPin, X, Printer, Circle, Heart, Download, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 import Navigation from "./components/Navigation";
@@ -14,6 +14,46 @@ function MainApp() {
   const [activeSection, setActiveSection] = useState("about");
   const [showResumeModal, setShowResumeModal] = useState(false);
   const { accent, theme } = useTheme();
+
+  // Loading / reloading animation states
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingPercent, setLoadingPercent] = useState(0);
+  const [loadingStatus, setLoadingStatus] = useState("Initializing Core Modules...");
+
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const interval = setInterval(() => {
+      setLoadingPercent((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          const endTimer = setTimeout(() => {
+            setIsLoading(false);
+          }, 350);
+          return 100;
+        }
+
+        const nextVal = prev + Math.floor(Math.random() * 8) + 4;
+        const boundedVal = Math.min(nextVal, 100);
+
+        if (boundedVal < 25) {
+          setLoadingStatus("Retrieving Academic Records from MU...");
+        } else if (boundedVal < 50) {
+          setLoadingStatus("Compiling Professional Projects & Testing Matrix...");
+        } else if (boundedVal < 75) {
+          setLoadingStatus("Linking Relational Database & Secrets Modules...");
+        } else if (boundedVal < 100) {
+          setLoadingStatus("Formulating Secure Client Handshake...");
+        } else {
+          setLoadingStatus("Tanuj Portfolio Ready.");
+        }
+
+        return boundedVal;
+      });
+    }, 60);
+
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   // Triggers a simulated file download of a beautifully formatted resume PDF representation
   const handleDownloadPdf = () => {
@@ -199,11 +239,112 @@ startxref
         <ContactForm />
       </main>
 
-      {/* Floating back-to-top indicator */}
-      <div className="fixed bottom-8 right-8 z-40 flex items-center gap-1 bg-zinc-900/60 backdrop-blur-md border border-zinc-800 px-3 py-1.5 rounded-full text-[10px] font-mono text-zinc-500 shadow-xl">
+      {/* Floating back-to-top indicator with manual animation re-trigger */}
+      <div className="fixed bottom-8 right-8 z-40 flex items-center gap-2 bg-zinc-900/80 backdrop-blur-md border border-zinc-800/80 px-3.5 py-2 rounded-full text-[10px] font-mono text-zinc-400 hover:text-white transition-colors duration-300 shadow-2xl">
         <Circle className="w-2 h-2 fill-emerald-500 text-emerald-500 animate-pulse" />
         <span>NODE CURRENT: HYD</span>
+        <span className="w-[1px] h-3.5 bg-zinc-800" />
+        <button 
+          onClick={() => {
+            setLoadingPercent(0);
+            setIsLoading(true);
+          }}
+          className="hover:text-amber-400 focus:text-amber-400 active:scale-90 transition-all font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+          title="Re-run terminal loading animation"
+        >
+          <RefreshCw className="w-2.5 h-2.5 animate-[spin_4s_linear_infinite]" />
+          <span>REBOOT</span>
+        </button>
       </div>
+
+      {/* Immersive Start Loading Matrix Screen */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            key="preloader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.5, ease: "easeInOut" } }}
+            className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center p-6 text-zinc-100 overflow-hidden select-none"
+          >
+            {/* Glowing grids background inside preloader */}
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(9,9,11,0.2)_0%,rgba(0,0,0,1)_100%)] pointer-events-none" />
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full ${accent === "purple" ? "bg-purple-900/10" : accent === "blue" ? "bg-blue-900/10" : "bg-emerald-900/10"} blur-[100px] pointer-events-none`} />
+
+            {/* Micro-tech frame panel */}
+            <motion.div 
+              initial={{ scale: 0.98, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+              className="relative w-full max-w-md bg-zinc-950/85 border border-zinc-900 p-8 rounded-2xl shadow-2xl backdrop-blur-md flex flex-col space-y-6"
+            >
+              {/* Header panel */}
+              <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2.5 h-2.5 rounded-full ${accent === "purple" ? "bg-purple-500" : accent === "blue" ? "bg-blue-500" : "bg-emerald-500"} animate-ping`} />
+                  <span className="font-mono text-xs uppercase tracking-widest text-zinc-400">Terminal Boot Sequence</span>
+                </div>
+                <span className="font-mono text-[10px] text-zinc-500 uppercase">Sec. Auth: active</span>
+              </div>
+
+              {/* Dynamic Terminal Data readout */}
+              <div className="space-y-3 font-mono text-xs text-zinc-400">
+                <div className="flex justify-between items-center bg-zinc-900/40 border border-zinc-900/20 px-3 py-1.5 rounded-lg">
+                  <span className="text-zinc-550">TARGET:</span>
+                  <span className="text-zinc-200">Nimmala Tanuj</span>
+                </div>
+                <div className="flex justify-between items-center bg-zinc-900/40 border border-zinc-900/20 px-3 py-1.5 rounded-lg">
+                  <span className="text-zinc-550">DEPT:</span>
+                  <span className="text-zinc-200">B.Tech CSE QA & Dev</span>
+                </div>
+                <div className="flex justify-between items-center bg-zinc-900/40 border border-zinc-900/20 px-3 py-1.5 rounded-lg min-h-[36px]">
+                  <span className="text-zinc-550">STATUS:</span>
+                  <span className={`font-semibold text-right ${accent === "purple" ? "text-purple-400" : accent === "blue" ? "text-blue-400" : "text-emerald-400"}`}>{loadingStatus}</span>
+                </div>
+              </div>
+
+              {/* Centered large animated percent indicator */}
+              <div className="flex flex-col items-center justify-center py-4 relative">
+                <div className="relative flex items-center justify-center">
+                  {/* Circular orbit loader track */}
+                  <div className="w-24 h-24 rounded-full border border-zinc-900" />
+                  <div className={`absolute inset-0 rounded-full border border-t-2 ${accent === "purple" ? "border-t-purple-500" : accent === "blue" ? "border-t-blue-500" : "border-t-emerald-500"} animate-spin`} style={{ animationDuration: '1.2s' }} />
+                  
+                  {/* Core percent figure */}
+                  <span className="absolute font-sans font-black text-2xl text-white tracking-widest leading-none">
+                    {loadingPercent}%
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress bar scale representation */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] font-mono text-zinc-500">
+                  <span>DEPLOYED PAYLOAD</span>
+                  <span>{loadingPercent}/100 MB</span>
+                </div>
+                <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-850 p-[1px]">
+                  <motion.div 
+                    className={`h-full rounded-full bg-gradient-to-r ${accent === "purple" ? "from-purple-500 to-indigo-500" : accent === "blue" ? "from-blue-500 to-indigo-500" : "from-emerald-500 to-indigo-500"}`}
+                    style={{ width: `${loadingPercent}%` }}
+                    transition={{ ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+
+              {/* Interactive Skip prompt */}
+              <div className="pt-2 text-center">
+                <button
+                  onClick={() => setIsLoading(false)}
+                  className="font-mono text-[9px] text-zinc-400 hover:text-white transition-colors duration-300 uppercase tracking-wider cursor-pointer border border-zinc-900 hover:border-zinc-800 px-3/5 py-2 rounded-lg"
+                >
+                  Bypass Sequence (Skip Loading)
+                </button>
+              </div>
+
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Immersive printable Resume modal */}
       <AnimatePresence>

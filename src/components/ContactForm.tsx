@@ -1,5 +1,5 @@
 import { useState, FormEvent } from "react";
-import { Mail, Phone, MapPin, Send, CheckCircle, Github, Linkedin, Award } from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle, Github, Linkedin, Award, ChevronDown, ChevronUp, Trash2, Database, Inbox, Lock, Unlock } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTheme } from "../context/ThemeContext";
 
@@ -9,6 +9,32 @@ export default function ContactForm() {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLogsExpanded, setIsLogsExpanded] = useState(false);
+  const [passcode, setPasscode] = useState("");
+  const [passcodeError, setPasscodeError] = useState(false);
+  
+  const [isOwnerAuthenticated, setIsOwnerAuthenticated] = useState<boolean>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        return sessionStorage.getItem("owner-authenticated") === "true";
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return false;
+  });
+  
+  const [sentMessages, setSentMessages] = useState<Array<{ id: string; name: string; email: string; message: string; timestamp: string }>>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        return JSON.parse(localStorage.getItem("contact-messages") || "[]");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return [];
+  });
+
   const { accent, theme } = useTheme();
 
   const handleSubmit = (e: FormEvent) => {
@@ -18,12 +44,36 @@ export default function ContactForm() {
     setIsSending(true);
     // Simulate digital dispatching progress
     setTimeout(() => {
+      const newMessage = {
+        id: Date.now().toString(),
+        name,
+        email,
+        message,
+        timestamp: new Date().toLocaleString()
+      };
+
+      const currentMessages = JSON.parse(localStorage.getItem("contact-messages") || "[]");
+      const updatedMessages = [newMessage, ...currentMessages];
+      localStorage.setItem("contact-messages", JSON.stringify(updatedMessages));
+      setSentMessages(updatedMessages);
+
       setIsSending(false);
       setIsSuccess(true);
       setName("");
       setEmail("");
       setMessage("");
     }, 1800);
+  };
+
+  const handleDeleteMessage = (id: string) => {
+    const updated = sentMessages.filter(msg => msg.id !== id);
+    localStorage.setItem("contact-messages", JSON.stringify(updated));
+    setSentMessages(updated);
+  };
+
+  const handleClearAll = () => {
+    localStorage.removeItem("contact-messages");
+    setSentMessages([]);
   };
 
   return (
@@ -243,6 +293,174 @@ export default function ContactForm() {
             </div>
           </div>
 
+        </div>
+
+        {/* Local storage sent messages database console */}
+        <div className="mt-12 bg-zinc-900/40 border border-zinc-900 rounded-2xl overflow-hidden">
+          <button
+            onClick={() => setIsLogsExpanded(!isLogsExpanded)}
+            className="w-full flex items-center justify-between p-5 bg-zinc-900/80 hover:bg-zinc-900/95 text-left transition-colors cursor-pointer select-none"
+          >
+            <div className="flex items-center gap-2.5">
+              <Database className={`w-4 h-4 ${theme.primaryText}`} />
+              <div>
+                <span className="font-sans font-bold text-xs text-white">Transmitted Messages Console Log</span>
+                <span className="ml-1.5 font-mono text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.5 rounded-full inline-block">
+                  {sentMessages.length} pack{sentMessages.length === 1 ? "" : "s"}
+                </span>
+                <span className="ml-2 inline-flex items-center gap-1 font-mono text-[9px]">
+                  {isOwnerAuthenticated ? (
+                    <span className="text-emerald-500 flex items-center gap-1">
+                      <Unlock className="w-2.5 h-2.5" /> UNLOCKED
+                    </span>
+                  ) : (
+                    <span className="text-zinc-500 flex items-center gap-1">
+                      <Lock className="w-2.5 h-2.5" /> SECURE MODE (OWNER ONLY)
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[9px] text-zinc-500 uppercase tracking-wider hidden sm:inline">
+                {isLogsExpanded ? "Hide Database Console" : "Expand Local Database"}
+              </span>
+              {isLogsExpanded ? (
+                <ChevronUp className="w-4 h-4 text-zinc-400" />
+              ) : (
+                <ChevronDown className="w-4 h-4 text-zinc-400" />
+              )}
+            </div>
+          </button>
+
+          <AnimatePresence>
+            {isLogsExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="border-t border-zinc-900/60"
+              >
+                <div className="p-5 space-y-4 bg-zinc-950/20 max-h-[500px] overflow-y-auto">
+                  
+                  {!isOwnerAuthenticated ? (
+                    <div className="flex flex-col items-center justify-center py-10 px-4 max-w-sm mx-auto text-center space-y-4">
+                      <div className="p-3 bg-zinc-900 rounded-full border border-zinc-800 animate-pulse">
+                        <Lock className="w-5 h-5 text-amber-500" />
+                      </div>
+                      <div>
+                        <h4 className="font-sans font-bold text-sm text-white">Owner Authorization Required</h4>
+                        <p className="font-mono text-[10px] text-zinc-500 mt-1 leading-relaxed">
+                          The client payload database is stored private to this terminal. Verify ownership passcode to view message packets.
+                        </p>
+                      </div>
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const val = passcode.trim().toLowerCase();
+                          if (val === "tanuj") {
+                            setIsOwnerAuthenticated(true);
+                            sessionStorage.setItem("owner-authenticated", "true");
+                            setPasscodeError(false);
+                          } else {
+                            setPasscodeError(true);
+                          }
+                        }}
+                        className="w-full space-y-2.5"
+                      >
+                        <input
+                          type="password"
+                          value={passcode}
+                          onChange={(e) => {
+                            setPasscode(e.target.value);
+                            setPasscodeError(false);
+                          }}
+                          placeholder="Enter Developer Passcode"
+                          className={`w-full px-3 py-2 bg-zinc-950 font-mono text-[11px] text-center text-white placeholder-zinc-750 rounded-lg border ${
+                            passcodeError ? "border-rose-500/50 focus:border-rose-500" : "border-zinc-800 focus:border-zinc-700"
+                          } focus:outline-none transition-all`}
+                        />
+                        {passcodeError && (
+                          <p className="font-mono text-[9px] text-rose-500">Invalid passcode. Please try again.</p>
+                        )}
+                        <button
+                          type="submit"
+                          className="w-full py-1.5 bg-zinc-850 hover:bg-zinc-800 text-zinc-300 font-mono text-[10px] uppercase tracking-wider rounded-lg border border-zinc-800 hover:border-zinc-700 cursor-pointer transition-all"
+                        >
+                          Verify and Unlock
+                        </button>
+                      </form>
+                    </div>
+                  ) : (
+                    sentMessages.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center p-8 text-center text-zinc-500">
+                        <Inbox className="w-8 h-8 opacity-25 mb-2 text-zinc-400" />
+                        <p className="font-sans text-xs">No locally transmitted message payloads detected in user session cache.</p>
+                        <p className="font-mono text-[9px] text-zinc-600 mt-1 uppercase tracking-wider">Fill and submit the form above to record packets</p>
+                        <button
+                          onClick={() => {
+                            setIsOwnerAuthenticated(false);
+                            sessionStorage.removeItem("owner-authenticated");
+                          }}
+                          className="mt-4 font-mono text-[9px] text-zinc-400 hover:text-white transition-colors uppercase border border-zinc-800 px-2.5 py-1 rounded cursor-pointer"
+                        >
+                          Lock Database
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between pb-2 border-b border-zinc-900/70">
+                          <span className="font-mono text-[9px] uppercase tracking-wider text-zinc-500">Stored Payload Fields</span>
+                          <div className="flex items-center gap-4">
+                            <button
+                              onClick={() => {
+                                setIsOwnerAuthenticated(false);
+                                sessionStorage.removeItem("owner-authenticated");
+                              }}
+                              className="font-mono text-[9px] uppercase tracking-wider text-zinc-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                            >
+                              <Lock className="w-3 h-3" /> Lock Console
+                            </button>
+                            <button
+                              onClick={handleClearAll}
+                              className="font-mono text-[9px] uppercase tracking-wider text-rose-500 hover:text-rose-400 transition-colors flex items-center gap-1 cursor-pointer"
+                            >
+                              <Trash2 className="w-3 h-3" /> Clear All Cache
+                            </button>
+                          </div>
+                        </div>
+
+                        {sentMessages.map((msg) => (
+                          <div key={msg.id} className="p-4 bg-zinc-900/40 border border-zinc-900/80 rounded-xl space-y-2 relative group hover:border-zinc-800 transition-all">
+                            <button
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className="absolute top-4 right-4 text-zinc-500 hover:text-rose-400 transition-colors opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-zinc-900 cursor-pointer"
+                              title="Delete message from cache"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-zinc-900/40 pr-8">
+                              <div>
+                                <span className="font-sans font-bold text-xs text-zinc-200">{msg.name}</span>
+                                <span className="text-zinc-500 font-mono text-[10px] ml-1.5 font-semibold">[{msg.email}]</span>
+                              </div>
+                              <span className="font-mono text-[9px] text-zinc-500">{msg.timestamp}</span>
+                            </div>
+
+                            <p className="font-sans text-xs text-zinc-300 whitespace-pre-wrap leading-relaxed">
+                              {msg.message}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Outer credit details (humble, professional) */}
