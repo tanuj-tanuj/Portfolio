@@ -141,6 +141,77 @@ Guidelines for your responses:
 5. Never invent false details or claim she/he knows languages/technologies not explicitly mentioned in the resume (e.g. don't say he is an expert in Rust or AWS if not listed). Always remain completely honest!
 `;
 
+function getOfflineFallbackResponse(message: string): string {
+  const query = message.toLowerCase();
+  
+  const prefix = `⚠️ **Offline Intelligent Fallback Active** (Please configure GEMINI_API_KEY inside AI Studio Secrets for open-ended conversation).\n\n`;
+
+  if (query.includes("hello") || query.includes("hi") || query.includes("hey") || query.includes("greet") || query.includes("twin")) {
+    return prefix + `Hello! I am Tanuj's Digital Proxy Assistant. 
+
+Even while running in local offline mode, I have fully compiled index parameters concerning Tanuj's credentials. Ask me details on his:
+- 💻 **Engineering Skills:** React, TypeScript, Python, SQL
+- 🎓 **Education:** Mahindra University B.Tech
+- 💼 **Projects & Experience:** Basis Laboratories Intern, Social Networking App Tester
+- 🏏 **Sports and Activities:** Cricket, Badminton, Pickleball
+- 📞 **Contact Channels**`;
+  }
+
+  if (query.includes("contact") || query.includes("email") || query.includes("phone") || query.includes("reach") || query.includes("linkedin") || query.includes("github") || query.includes("call")) {
+    return prefix + `Here is how you can directly establish communication with Tanuj:
+
+- 📧 **Personal Email:** [tanujrao2006@gmail.com](mailto:tanujrao2006@gmail.com)
+- 📧 **University Email:** [se23ucse125@mahindrauniversity.edu.in](mailto:se23ucse125@mahindrauniversity.edu.in)
+- 📞 **Mobile Contact:** [+91 9000263945](tel:+919000263945)
+- 💼 **LinkedIn Profile:** [linkedin.com/in/tanuj-nimmala-b80a072a2/](https://linkedin.com/in/tanuj-nimmala-b80a072a2/)
+- 💻 **GitHub Repository:** [github.com/Tanuj283](https://github.com/Tanuj283)`;
+  }
+
+  if (query.includes("skill") || query.includes("programming") || query.includes("language") || query.includes("python") || query.includes("typescript") || query.includes("react") || query.includes("c ") || query.includes("sql") || query.includes("database") || query.includes("mongodb")) {
+    return prefix + `Tanuj's engineered skill matrix includes:
+
+- **Programming Languages:** Python, TypeScript/JavaScript, C, and SQL.
+- **Web Architectures:** React.js, Vite, HTML5, and CSS3 / Tailwind.
+- **Enterprise Databases:** SQL Server, MongoDB, and DBMS Design.
+- **Development Productivity:** GitHub, Jira, Jupyter Notebooks, and MS Excel.
+- **Core Operations:** UI/UX functional testing, database schema mapping, custom algorithms, and data structures.`;
+  }
+
+  if (query.includes("project") || query.includes("social") || query.includes("inventory") || query.includes("basis") || query.includes("laboratories") || query.includes("intern") || query.includes("experience") || query.includes("work")) {
+    return prefix + `Tanuj has contributed critical milestones in empirical development:
+
+1. **Mahindra University Social App (Jan 2026 – May 2026):** Served as UI/UX tester. Authored system workflows, documented UI inconsistencies, and mapped out comprehensive user verification tests.
+2. **Inventory Management Dashboard (Jun 2025 – Oct 2025):** Crafted high-fidelity interactive systems utilizing React, TypeScript, and Vite during his time with Basis Laboratories.
+3. **Data Analysis Internship (Basis Laboratories - Jun 2025):** Proposed database schemas, safety buffer variables, and mathematical stock optimization algorithms to safeguard holding risks.`;
+  }
+
+  if (query.includes("education") || query.includes("mahindra") || query.includes("university") || query.includes("college") || query.includes("school") || query.includes("coursework") || query.includes("gpa") || query.includes("score")) {
+    return prefix + `Tanuj's academic checkpoints:
+
+- 🎓 **B.Tech in Computer Science Engineering** (2023 – Present) | **Mahindra University**
+  * *Coursework:* Data Structures, Operating Systems, DBMS, Machine Learning, Applied Statistics, Quantum Computing, Evolutionary Systems.
+- 🏫 **Intermediate (85%)** (2021 – 2023) | **Exellencia Junior College**
+- 🏫 **SSC (98%)** (2020 – 2021) | **FIITJEE World School**`;
+  }
+
+  if (query.includes("sports") || query.includes("cricket") || query.includes("badminton") || query.includes("pickleball") || query.includes("hobby") || query.includes("hobbies") || query.includes("interest") || query.includes("volunteer")) {
+    return prefix + `Beyond compiling code, Tanuj is highly dynamic:
+
+- 🏏 **Athletics:** He is passionate about playing **Cricket**, **Badminton**, and the fast-growing racket sport **Pickleball**!
+- 🎨 **Technical Curiosities:** Deeply interested in Generative AI, client-side web frameworks, and smart automation systems.
+- 🤝 **Community presence:** Active participant and helper in student volunteer operations at Mahindra University.`;
+  }
+
+  return prefix + `I am Tanuj's Digital Twin (Offline Mode). Your query did not trigger specific local keywords, but here is a summarized directory of his portfolio:
+
+- **Biography:** B.Tech Computer Science student at Mahindra University (Hyderabad).
+- **Core Stack:** Python, SQL, C, TypeScript, React.js.
+- **Specialty:** Front-end interactive layouts, UI/UX test suites, and database designs.
+- **Quick Command:** Type **skills**, **projects**, or **contact** for deeper, dedicated readouts.
+
+*(Provide a standard \`GEMINI_API_KEY\` in Settings > Secrets to unlock genuine AI dialog!)*`;
+}
+
 // AI Assistant chat API endpoint
 app.post("/api/chat", async (req, res) => {
   try {
@@ -150,38 +221,49 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ error: "Message is required." });
     }
 
-    // Call Gemini API utilizing the recommended gemini-3.5-flash model
-    const chatContents = [];
-    if (history && Array.isArray(history)) {
-      for (const msg of history) {
-        chatContents.push({
-          role: msg.role === "user" ? "user" : "model",
-          parts: [{ text: msg.text }],
-        });
-      }
+    // Check if the API key is not configured or is a placeholder/empty
+    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.trim() === "" || process.env.GEMINI_API_KEY.includes("YOUR_")) {
+      console.log("No GEMINI_API_KEY configured. Returning helpful offline response.");
+      const replyText = getOfflineFallbackResponse(message);
+      return res.json({ text: replyText });
     }
-    chatContents.push({
-      role: "user",
-      parts: [{ text: message }],
-    });
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
-      contents: chatContents,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0.7,
-      },
-    });
+    try {
+      // Call Gemini API utilizing the recommended gemini-3.5-flash model
+      const chatContents = [];
+      if (history && Array.isArray(history)) {
+        for (const msg of history) {
+          chatContents.push({
+            role: msg.role === "user" ? "user" : "model",
+            parts: [{ text: msg.text }],
+          });
+        }
+      }
+      chatContents.push({
+        role: "user",
+        parts: [{ text: message }],
+      });
 
-    const replyText = response.text || "I was unable to formulate an answer. How else can I assist you with Tanuj's resume?";
-    res.json({ text: replyText });
+      const response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents: chatContents,
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          temperature: 0.7,
+        },
+      });
+
+      const replyText = response.text || "I was unable to formulate an answer. How else can I assist you with Tanuj's resume?";
+      return res.json({ text: replyText });
+    } catch (apiError: any) {
+      console.warn("Gemini API call failed, falling back to cached response:", apiError.message);
+      const fallbackText = getOfflineFallbackResponse(message);
+      return res.json({ text: fallbackText });
+    }
   } catch (error: any) {
-    console.error("Gemini API Error in /api/chat:", error);
-    res.status(500).json({
-      error: "Failed to connect to Nimmala Tanuj's AI Twin. Please make sure the GEMINI_API_KEY is configured in your secrets.",
-      details: error.message,
-    });
+    console.error("Critical server error in /api/chat:", error);
+    const fallbackText = getOfflineFallbackResponse(req.body?.message || "");
+    return res.json({ text: fallbackText });
   }
 });
 
